@@ -10,10 +10,13 @@
 #include <crtdbg.h>
 #endif
  
-#include <d3dx11.h>
+//#include <d3dx11.h>
+#include <d3d11.h>
 #include "d3dx11Effect.h"
-#include <xnamath.h>
-#include <dxerr.h>
+#include <DirectXPackedVector.h>
+//#include <xnamath.h>
+//#include <dxerr.h>
+#include <DirectXMath.h>
 #include <cassert>
 #include <ctime>
 #include <algorithm>
@@ -23,6 +26,21 @@
 #include <vector>
 #include "MathHelper.h"
 #include "LightHelper.h"
+#include "dxerr.h"
+
+#pragma comment(lib, "DXUT.lib")
+#pragma comment(lib, "DirectXTK.lib")
+
+#if defined(DEBUG) || defined(_DEBUG)
+#pragma comment(lib, "Effects11d.lib")
+#else
+#pragma comment(lib, "Effects11.lib")
+#endif
+
+#pragma comment (lib, "Comctl32.lib")
+
+using namespace DirectX;
+using namespace DirectX::PackedVector;
 
 //---------------------------------------------------------------------------------------
 // Simple d3d error checker for book demos.
@@ -35,7 +53,7 @@
 		HRESULT hr = (x);                                      \
 		if(FAILED(hr))                                         \
 		{                                                      \
-			DXTrace(__FILE__, (DWORD)__LINE__, hr, L#x, true); \
+			DXTrace(__FILEW__, (DWORD)__LINE__, hr, L#x, true); \
 		}                                                      \
 	}
 	#endif
@@ -73,9 +91,10 @@ public:
 	static ID3D11ShaderResourceView* CreateTexture2DArraySRV(
 		ID3D11Device* device, ID3D11DeviceContext* context,
 		std::vector<std::wstring>& filenames,
-		DXGI_FORMAT format = DXGI_FORMAT_FROM_FILE,
-		UINT filter = D3DX11_FILTER_NONE, 
-		UINT mipFilter = D3DX11_FILTER_LINEAR);
+        DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT,
+        //DXGI_FORMAT format = DXGI_FORMAT_FROM_FILE,
+		UINT filter = D3D11_FILTER_TYPE_LINEAR,
+		UINT mipFilter = D3D11_FILTER_TYPE_LINEAR);
 
 	static ID3D11ShaderResourceView* CreateRandomTexture1DSRV(ID3D11Device* device);
 };
@@ -85,7 +104,7 @@ class TextHelper
 public:
 
 	template<typename T>
-	static D3DX11INLINE std::wstring ToString(const T& s)
+	static inline std::wstring ToString(const T& s)
 	{
 		std::wostringstream oss;
 		oss << s;
@@ -94,7 +113,7 @@ public:
 	}
 
 	template<typename T>
-	static D3DX11INLINE T FromString(const std::wstring& s)
+	static /*D3DX11INLINE*/inline T FromString(const std::wstring& s)
 	{
 		T x;
 		std::wistringstream iss(s);
@@ -103,6 +122,22 @@ public:
 		return x;
 	}
 };
+
+struct MyFloat4x4
+{
+    XMFLOAT4X4 mat;
+
+    MyFloat4x4(const XMMATRIX &other)
+    {
+        XMStoreFloat4x4(&mat, other);
+    }
+
+    float operator ()(int x, int y)
+    {
+        return mat.m[x][y];
+    }
+};
+
 
 // Order: left, right, bottom, top, near, far.
 void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M);
@@ -139,7 +174,7 @@ public:
 	///<summary>
 	/// Converts XMVECTOR to XMCOLOR, where XMVECTOR represents a color.
 	///</summary>
-	static D3DX11INLINE XMCOLOR ToXmColor(FXMVECTOR v)
+	static /*D3DX11INLINE*/inline XMCOLOR ToXmColor(FXMVECTOR v)
 	{
 		XMCOLOR dest;
 		XMStoreColor(&dest, v);
@@ -149,14 +184,14 @@ public:
 	///<summary>
 	/// Converts XMVECTOR to XMFLOAT4, where XMVECTOR represents a color.
 	///</summary>
-	static D3DX11INLINE XMFLOAT4 ToXmFloat4(FXMVECTOR v)
+	static /*D3DX11INLINE*/inline XMFLOAT4 ToXmFloat4(FXMVECTOR v)
 	{
 		XMFLOAT4 dest;
 		XMStoreFloat4(&dest, v);
 		return dest;
 	}
 
-	static D3DX11INLINE UINT ArgbToAbgr(UINT argb)
+	static /*D3DX11INLINE*/inline UINT ArgbToAbgr(UINT argb)
 	{
 		BYTE A = (argb >> 24) & 0xff;
 		BYTE R = (argb >> 16) & 0xff;

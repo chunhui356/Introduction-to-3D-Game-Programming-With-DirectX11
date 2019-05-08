@@ -8,7 +8,9 @@
 #define LIGHTHELPER_H
 
 #include <Windows.h>
-#include <xnamath.h>
+//#include <xnamath.h>
+#include <DirectXMath.h>
+using namespace DirectX;
 
 // Note: Make sure structure alignment agrees with HLSL structure padding rules. 
 //   Elements are packed into 4D vectors with the restriction that an element
