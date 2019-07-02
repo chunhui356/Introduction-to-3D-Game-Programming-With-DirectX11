@@ -27,6 +27,7 @@
 #include "MathHelper.h"
 #include "LightHelper.h"
 #include "dxerr.h"
+#include "Inc/DDSTextureLoader.h"
 
 #pragma comment(lib, "DXUT.lib")
 #pragma comment(lib, "DirectXTK.lib")
